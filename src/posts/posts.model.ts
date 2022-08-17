@@ -14,8 +14,11 @@ export const PostSchema = new mongoose.Schema({
     default: Date(),
   },
   createdBy: {
-    type: String, // user id
+    type: String,
     required: true,
+  },
+  lastUpdated: {
+    type: Date,
   },
 });
 
@@ -23,5 +26,6 @@ export interface Post {
   title: string;
   content: string;
   dateCreated: string;
+  lastUpdated: string;
   createdBy: string;
 }

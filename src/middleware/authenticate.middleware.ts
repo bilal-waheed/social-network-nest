@@ -1,10 +1,5 @@
-import {
-  ForbiddenException,
-  HttpException,
-  Injectable,
-  NestMiddleware,
-} from '@nestjs/common';
-import { Request, Response, NextFunction, response } from 'express';
+import { ForbiddenException, Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 

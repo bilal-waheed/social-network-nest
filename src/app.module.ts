@@ -37,6 +37,11 @@ export class AppModule {
         'users/delete',
         'users/follow-user/:id',
         'users/unfollow-user/:id',
+        'posts/create',
+        'posts/update/:id',
+        'posts/delete/:id',
+        'posts/all',
+        'posts/feed',
       );
   }
 }
