@@ -4,8 +4,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 
-import { Moderator } from './moderator.interface';
-import { Post } from '../posts/post.interface';
+import { Moderator } from '../interfaces/moderator.interface';
+import { Post } from '../interfaces/post.interface';
 
 @Injectable()
 export class ModeratorsService {

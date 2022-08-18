@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import Stripe from 'stripe';
 import { Model } from 'mongoose';
-import { User } from '../users/user.interface';
+import { User } from '../interfaces/user.interface';
 
 @Injectable()
 export class CheckoutService {
@@ -45,7 +45,7 @@ export class CheckoutService {
         source: 'tok_visa',
       });
 
-      const user = await this.userModel.findOneAndUpdate(
+      await this.userModel.findOneAndUpdate(
         { _id: userId },
         { $set: { type: 'paid' } },
       );

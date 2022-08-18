@@ -12,7 +12,7 @@ import {
   validateSignUpData,
 } from 'src/validation/joi';
 
-import { ModeratorsService } from './moderators.service';
+import { ModeratorsService } from '../services/moderators.service';
 
 @Controller('moderators')
 export class ModeratorsController {

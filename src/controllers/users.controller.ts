@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { validateLoginData, validateSignUpData } from 'src/validation/joi';
 
-import { UsersService } from './users.service';
+import { UsersService } from '../services/users.service';
 
 @Controller('users')
 export class UsersController {

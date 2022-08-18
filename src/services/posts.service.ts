@@ -2,8 +2,8 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Post } from './post.interface';
-import { User } from '../users/user.interface';
+import { Post } from '../interfaces/post.interface';
+import { User } from '../interfaces/user.interface';
 import { SocketsGateway } from 'src/sockets/sockets.gateway';
 
 @Injectable()

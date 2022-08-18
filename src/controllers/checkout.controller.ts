@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 
-import { CheckoutService } from './checkout.service';
+import { CheckoutService } from '../services/checkout.service';
 
 @Controller('checkout')
 export class CheckoutController {

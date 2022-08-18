@@ -2,11 +2,11 @@ import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UsersModule } from './users/users.module';
-import { PostsModule } from './posts/posts.module';
-import { ModeratorsModule } from './moderators/moderators.module';
+import { UsersModule } from './modules/users.module';
+import { PostsModule } from './modules/posts.module';
+import { ModeratorsModule } from './modules/moderators.module';
 import { AuthMiddleware } from './middleware/authenticate.middleware';
-import { CheckoutModule } from './checkout/checkout.module';
+import { CheckoutModule } from './modules/checkout.module';
 import { SocketsModule } from './sockets/sockets.module';
 
 @Module({

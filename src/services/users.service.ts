@@ -5,8 +5,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 import { Model } from 'mongoose';
-import { User } from './user.interface';
-import { Post } from '../posts/post.interface';
+import { User } from '../interfaces/user.interface';
+import { Post } from '../interfaces/post.interface';
 
 @Injectable()
 export class UsersService {
@@ -198,7 +198,7 @@ export class UsersService {
       if (!user)
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-      const result = await this.postModel.deleteMany({ createdBy: id });
+      await this.postModel.deleteMany({ createdBy: id });
 
       return {
         success: true,
