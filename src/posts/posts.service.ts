@@ -16,6 +16,13 @@ export class PostsService {
     private readonly socketsGateway: SocketsGateway,
   ) {}
 
+  /**
+   * Returns all the posts created by the currently authenticated user.
+   * @param {string} id - mongo id of the user.
+   * @param {string} param - parameter used for ordering.
+   * @param {number} order - 1 for ascending, -1 for descending.
+   * @param {number} pageNumber - page number .
+   */
   async getAllPosts(
     id: string,
     param: string,
@@ -66,6 +73,12 @@ export class PostsService {
     }
   }
 
+  /**
+   * Create a post. Returns the created post
+   * @param {string} id - mongo id of the authenticated user.
+   * @param {string} title - title of the post.
+   * @param {string} content - content of the post.
+   */
   async createPost(id: string, title: string, content: string): Promise<any> {
     try {
       const newPost = new this.postModel({
@@ -84,6 +97,13 @@ export class PostsService {
     }
   }
 
+  /**
+   * Returns the feed of the currently authenticated user.
+   * @param {string} id - mongo id of the user.
+   * @param {string} param - parameter used for ordering.
+   * @param {number} order - 1 for ascending, -1 for descending.
+   * @param {number} pageNumber - page number .
+   */
   async getFeed(
     userId: string,
     param: string,
@@ -138,6 +158,13 @@ export class PostsService {
     };
   }
 
+  /**
+   * Update a post. Returns the updated post
+   * @param {string} postId - mongo id of the post to be updated.
+   * @param {string} userId - mongo id of the authenticated user.
+   * @param {string} title - title of the post.
+   * @param {string} content - content of the post.
+   */
   async updatePost(
     postId: string,
     userId: string,
@@ -183,6 +210,11 @@ export class PostsService {
     }
   }
 
+  /**
+   * Delete a post.
+   * @param {string} postId - mongo id of the post to be updated.
+   * @param {string} userId - mongo id of the authenticated user.
+   */
   async deletePost(postId: string, userId): Promise<any> {
     try {
       const post = await this.postModel.findOneAndDelete({ _id: postId });

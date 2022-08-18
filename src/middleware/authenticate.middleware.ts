@@ -25,8 +25,7 @@ export class AuthMiddleware implements NestMiddleware {
         },
         HttpStatus.UNAUTHORIZED,
       );
-    // throw new Error('Access denied. A token is required for authentication.');
-    // console.log(token);
+
     try {
       const verified = jwt.verify(token, process.env.SECRET_OR_PRIVATE_KEY);
       const url = req.originalUrl.split('/')[1];
@@ -40,10 +39,8 @@ export class AuthMiddleware implements NestMiddleware {
           HttpStatus.FORBIDDEN,
         );
 
-      //  console.log(verified);
       req.body = { ...req.body, user: verified };
     } catch (err) {
-      // console.log(err);
       throw new ForbiddenException();
     }
     return next();

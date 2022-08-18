@@ -16,6 +16,14 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * User signup. Returns a success object or an error object.
+   * @param {string} firstName - user first name.
+   * @param {string} lastName - user last name.
+   * @param {string} username - username / handle.
+   * @param {string} email - user email.
+   * @param {string} password - user password.
+   */
   async signup(
     firstName: string,
     lastName: string,
@@ -69,6 +77,11 @@ export class UsersService {
     }
   }
 
+  /**
+   * User login. Returns a success object or an error object.
+   * @param {string} username - username / handle.
+   * @param {string} password - user password.
+   */
   async login(username: string, password: string): Promise<any> {
     try {
       // check if the user exists
@@ -101,6 +114,10 @@ export class UsersService {
     }
   }
 
+  /**
+   * Returns the profile of currently authenticated user.
+   * @param {string} id - mongo id of the user.
+   */
   async getProfile(id: string): Promise<any> {
     try {
       const user = await this.userModel.findOne({ _id: id });
@@ -118,6 +135,14 @@ export class UsersService {
     }
   }
 
+  /**
+   * User update. Returns a success object or an error object.
+   * @param {string} firstName - optional user first name.
+   * @param {string} lastName - optional user last name.
+   * @param {string} username - optional username / handle.
+   * @param {string} email - optional user email.
+   * @param {string} password - optional user password.
+   */
   async updateProfile(
     id: string,
     body: {
@@ -178,6 +203,10 @@ export class UsersService {
     }
   }
 
+  /**
+   * Delete the currently authenticated user.
+   * @param {string} id - mongo id of the user.
+   */
   async deleteUser(id: string): Promise<any> {
     try {
       const user = await this.userModel.findOneAndDelete({ _id: id });
@@ -206,6 +235,11 @@ export class UsersService {
     }
   }
 
+  /**
+   * Follow another user.
+   * @param {string} userId - mongo id of the user to be followed.
+   * @param {string} selfId - mongo id of the authenticated user.
+   */
   async followUser(userId: string, selfId: string): Promise<any> {
     try {
       const userToFollow = await this.userModel.findOne({
@@ -243,6 +277,11 @@ export class UsersService {
     }
   }
 
+  /**
+   * Unfollow an already followed user.
+   * @param {string} userId - mongo id of the user to be unfollowed.
+   * @param {string} selfId - mongo id of the authenticated user.
+   */
   async unfollowUser(userId: string, selfId: string): Promise<any> {
     try {
       const userToUnfollow = await this.userModel.findOne({ _id: userId });

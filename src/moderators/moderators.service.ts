@@ -16,6 +16,14 @@ export class ModeratorsService {
     @InjectModel('Post') private readonly postModel: Model<Post>,
   ) {}
 
+  /**
+   * Moderator signup. Returns a success object or an error object.
+   * @param {string} firstName - moderator first name.
+   * @param {string} lastName - moderator last name.
+   * @param {string} username - username / handle.
+   * @param {string} email - moderator email.
+   * @param {string} password - moderator password.
+   */
   async signup(
     firstName: string,
     lastName: string,
@@ -63,6 +71,11 @@ export class ModeratorsService {
     }
   }
 
+  /**
+   * Moderator login. Returns a success object or an error object.
+   * @param {string} username - username / handle.
+   * @param {string} password - user password.
+   */
   async login(username: string, password: string): Promise<any> {
     try {
       // check if the moderator exists
@@ -95,6 +108,12 @@ export class ModeratorsService {
     }
   }
 
+  /**
+   * Returns a success ojbect containing user posts or an error object.
+   * @param {string} param - parameter used for ordering.
+   * @param {number} order - 1 for ascending, -1 for descending.
+   * @param {number} pageNumber - page number .
+   */
   async getPosts(
     param: string,
     order: number,
