@@ -62,13 +62,7 @@ export class ModeratorsController {
     const { value, error } = validateLoginData({ username, password });
 
     if (error)
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.moderatorsService.login(
       value.username,
@@ -87,13 +81,7 @@ export class ModeratorsController {
     const { value, error } = validatePaginationData({ param, order, page });
 
     if (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
     }
     const result = await this.moderatorsService.getPosts(
       value.param,

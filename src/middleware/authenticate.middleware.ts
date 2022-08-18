@@ -31,13 +31,7 @@ export class AuthMiddleware implements NestMiddleware {
       const url = req.originalUrl.split('/')[1];
       const { userType } = verified;
       if (url == 'moderators' && userType == 'user')
-        throw new HttpException(
-          {
-            status: HttpStatus.FORBIDDEN,
-            error: 'Forbidden',
-          },
-          HttpStatus.FORBIDDEN,
-        );
+        throw new ForbiddenException();
 
       req.body = { ...req.body, user: verified };
     } catch (err) {

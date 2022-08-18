@@ -4,8 +4,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 
-import { Moderator } from './moderators.model';
-import { Post } from '../posts/posts.model';
+import { Moderator } from './moderator.interface';
+import { Post } from '../posts/post.interface';
 
 @Injectable()
 export class ModeratorsService {
@@ -33,7 +33,11 @@ export class ModeratorsService {
   ): Promise<any> {
     try {
       const mod = await this.moderatorModel.findOne({ username });
-      if (mod) return { error: 'moderator already exists' };
+      if (mod)
+        throw new HttpException(
+          'Moderator already exists',
+          HttpStatus.BAD_REQUEST,
+        );
 
       const newMod = new this.moderatorModel({
         firstName,
@@ -81,13 +85,7 @@ export class ModeratorsService {
       // check if the moderator exists
       const mod = await this.moderatorModel.findOne({ username });
       if (!mod)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'Moderator not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('Moderator not found', HttpStatus.NOT_FOUND);
 
       // Comparing the password
       const isMatched = bcrypt.compare(password, mod.password);
@@ -102,7 +100,7 @@ export class ModeratorsService {
         return { success: true, msg: 'login successful', mod, token };
       }
 
-      return { error: 'password incorrect' };
+      throw new HttpException('password incorrect', HttpStatus.BAD_REQUEST);
     } catch (err) {
       return err;
     }
@@ -126,15 +124,18 @@ export class ModeratorsService {
       const postsCount = await this.postModel.find().count();
 
       if (pageNumber * this.PER_PAGE_ITEMS >= postsCount + this.PER_PAGE_ITEMS)
-        return { error: 'Page does not exist' };
-
+        throw new HttpException(
+          'Requested page does not exist',
+          HttpStatus.NOT_FOUND,
+        );
       const posts = await this.postModel
         .find()
         .sort(orderSort)
         .skip((pageNumber - 1) * this.PER_PAGE_ITEMS)
         .limit(this.PER_PAGE_ITEMS);
 
-      if (!posts) return 'No posts found';
+      if (!posts)
+        throw new HttpException('No posts found', HttpStatus.NOT_FOUND);
 
       const mappedPosts = posts.map((post) => ({
         _id: post.id,

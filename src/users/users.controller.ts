@@ -34,13 +34,7 @@ export class UsersController {
     });
 
     if (error)
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.usersService.signup(
       value.firstName,
@@ -61,13 +55,7 @@ export class UsersController {
     const { value, error } = validateLoginData({ username, password });
 
     if (error)
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.usersService.login(
       value.username,
@@ -100,13 +88,7 @@ export class UsersController {
     });
 
     if (error)
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.usersService.updateProfile(user.id, value);
     return result;

@@ -60,15 +60,8 @@ export class PostsController {
   ) {
     const { value, error } = validatePaginationData({ param, order, page });
 
-    if (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    if (error)
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.postsService.getAllPosts(
       user.id,
@@ -88,15 +81,8 @@ export class PostsController {
   ) {
     const { value, error } = validatePaginationData({ param, order, page });
 
-    if (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: error.details[0].message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    if (error)
+      throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
     const result = await this.postsService.getFeed(
       user.id,

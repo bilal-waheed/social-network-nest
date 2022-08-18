@@ -21,11 +21,3 @@ export const PostSchema = new mongoose.Schema({
     type: Date,
   },
 });
-
-export interface Post {
-  title: string;
-  content: string;
-  dateCreated: string;
-  lastUpdated: string;
-  createdBy: string;
-}

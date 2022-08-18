@@ -5,8 +5,8 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 import { Model } from 'mongoose';
-import { User } from './users.model';
-import { Post } from '../posts/posts.model';
+import { User } from './user.interface';
+import { Post } from '../posts/post.interface';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +34,8 @@ export class UsersService {
     try {
       const user = await this.userModel.findOne({ username });
 
-      if (user) return 'User already exists';
+      if (user)
+        throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
 
       const newUser = new this.userModel({
         firstName,
@@ -87,13 +88,7 @@ export class UsersService {
       // check if the user exists
       const user = await this.userModel.findOne({ username });
       if (!user)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'User not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       // Comparing the password
       const isMatched = bcrypt.compare(password, user.password);
@@ -103,12 +98,11 @@ export class UsersService {
           process.env.SECRET_OR_PRIVATE_KEY,
           { expiresIn: '7d' },
         );
-
         // sessionStorage.setItem('user-type', user.type);
-
         return { success: true, msg: 'login successful', user, token };
       }
-      return { error: 'password incorrect' };
+
+      throw new HttpException('password incorrect', HttpStatus.BAD_REQUEST);
     } catch (err) {
       return err;
     }
@@ -157,22 +151,10 @@ export class UsersService {
       const user = await this.userModel.findOne({ _id: id });
 
       if (!user)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'User not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       if (user.id !== id)
-        throw new HttpException(
-          {
-            status: HttpStatus.UNAUTHORIZED,
-            error: 'Unauthorized',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
       user.firstName = body.firstName ? body.firstName : user.firstName;
       user.lastName = body.lastName ? body.lastName : user.lastName;
@@ -211,18 +193,10 @@ export class UsersService {
     try {
       const user = await this.userModel.findOneAndDelete({ _id: id });
       if (user.id !== id)
-        return {
-          error: 'Unauthorized.',
-        };
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 
       if (!user)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'User not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       const result = await this.postModel.deleteMany({ createdBy: id });
 
@@ -247,18 +221,15 @@ export class UsersService {
       });
 
       if (!userToFollow)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'User not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       const user = await this.userModel.findOne({ _id: selfId });
 
       if (user.following.includes(userId))
-        return { error: 'User already followed' };
+        throw new HttpException(
+          'User already followed',
+          HttpStatus.BAD_REQUEST,
+        );
 
       user.following.push(userId);
 
@@ -287,13 +258,7 @@ export class UsersService {
       const userToUnfollow = await this.userModel.findOne({ _id: userId });
 
       if (!userToUnfollow)
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'User not found',
-          },
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
       const user = await this.userModel.findOne({ _id: selfId });
 
@@ -301,7 +266,8 @@ export class UsersService {
         (id) => id === userId,
       );
 
-      if (indexOfUserFollowing === -1) return { error: 'User not followed' };
+      if (indexOfUserFollowing === -1)
+        throw new HttpException('User not followed', HttpStatus.BAD_REQUEST);
 
       user.following.splice(indexOfUserFollowing, 1);
 

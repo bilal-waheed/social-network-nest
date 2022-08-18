@@ -1,5 +1,5 @@
-import { Post } from '../posts/posts.model';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Post } from '../posts/post.interface';
 
 @WebSocketGateway()
 export class SocketsGateway {
