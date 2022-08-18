@@ -9,6 +9,7 @@ import { PostsModule } from './posts/posts.module';
 import { ModeratorsModule } from './moderators/moderators.module';
 import { AuthMiddleware } from './middleware/authenticate.middleware';
 import { CheckoutModule } from './checkout/checkout.module';
+import { SocketsModule } from './sockets/sockets.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CheckoutModule } from './checkout/checkout.module';
     PostsModule,
     ModeratorsModule,
     CheckoutModule,
+    SocketsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

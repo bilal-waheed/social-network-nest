@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Post } from './posts.model';
 import { User } from '../users/users.model';
+import { SocketsGateway } from 'src/sockets/sockets.gateway';
 
 @Injectable()
 export class PostsService {
@@ -14,6 +14,7 @@ export class PostsService {
     @InjectModel('Post') private readonly postModel: Model<Post>,
     @InjectModel('User') private readonly userModel: Model<User>,
     private readonly configService: ConfigService,
+    private readonly socketsGateway: SocketsGateway,
   ) {}
 
   async getAllPosts(
@@ -72,7 +73,8 @@ export class PostsService {
 
       const savedPost = await newPost.save();
 
-      // io.getIO().emit('posts', { message: 'New post created', post });
+      this.socketsGateway.handleCreate(savedPost, 'New Post Created');
+
       return { success: true, post: savedPost };
     } catch (err) {
       return err;
@@ -116,7 +118,7 @@ export class PostsService {
       success: true,
       posts,
       totalPosts: postsCount,
-      nextPage: pageNumber + 1,
+      nextPage: Number(pageNumber) + 1,
       hasNextPage: pageNumber * this.PER_PAGE_ITEMS < postsCount,
       hasPrevPage: pageNumber > 1,
     };
@@ -143,10 +145,8 @@ export class PostsService {
       post.lastUpdated = Date.now().toString();
 
       const updatedPost = await post.save();
-      // io.getIO().emit('posts', {
-      //   message: 'A post updated',
-      //   updatedPost,
-      // });
+
+      this.socketsGateway.handleCreate(updatedPost, 'Post Updated');
 
       return {
         success: true,

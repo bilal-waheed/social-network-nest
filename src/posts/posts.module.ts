@@ -5,6 +5,7 @@ import { PostsController } from './posts.controller';
 import { PostSchema } from './posts.model';
 import { PostsService } from './posts.service';
 import { UserSchema } from '../users/users.model';
+import { SocketsGateway } from '../sockets/sockets.gateway';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { UserSchema } from '../users/users.model';
     ]),
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, SocketsGateway],
 })
 export class PostsModule {}
