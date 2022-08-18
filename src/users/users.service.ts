@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
@@ -7,7 +7,6 @@ import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import { User } from './users.model';
 import { Post } from '../posts/posts.model';
-import { validateLoginData, validateSignUpData } from 'src/validation/joi';
 
 @Injectable()
 export class UsersService {
@@ -23,21 +22,11 @@ export class UsersService {
     username: string,
     email: string,
     password: string,
-  ) {
+  ): Promise<any> {
     try {
       const user = await this.userModel.findOne({ username });
 
       if (user) return 'User already exists';
-
-      const { value, error } = validateSignUpData({
-        firstName,
-        lastName,
-        username,
-        email,
-        password,
-      });
-
-      if (error) return error.details[0].message;
 
       const newUser = new this.userModel({
         firstName,
@@ -65,7 +54,7 @@ export class UsersService {
 
       const token = jwt.sign(
         { id: userObj.id, userType: 'user' },
-        this.configService.get<string>('SECRET_OR_PRIVATE_KEY'),
+        process.env.SECRET_OR_PRIVATE_KEY,
         { expiresIn: '24h' },
       );
 
@@ -80,22 +69,25 @@ export class UsersService {
     }
   }
 
-  async login(username: string, password: string) {
+  async login(username: string, password: string): Promise<any> {
     try {
-      const { value, error } = validateLoginData({ username, password });
-
-      if (error) return error.details[0].message;
-
       // check if the user exists
       const user = await this.userModel.findOne({ username });
-      if (!user) return { error: 'User not found' };
+      if (!user)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       // Comparing the password
       const isMatched = bcrypt.compare(password, user.password);
       if (isMatched) {
         const token = jwt.sign(
           { id: user.id, userType: 'user' },
-          this.configService.get<string>('SECRET_OR_PRIVATE_KEY'),
+          process.env.SECRET_OR_PRIVATE_KEY,
           { expiresIn: '7d' },
         );
 
@@ -109,7 +101,7 @@ export class UsersService {
     }
   }
 
-  async getProfile(id: string) {
+  async getProfile(id: string): Promise<any> {
     try {
       const user = await this.userModel.findOne({ _id: id });
       return {
@@ -135,28 +127,39 @@ export class UsersService {
       email?: string;
       password?: string;
     },
-  ) {
+  ): Promise<any> {
     try {
       const user = await this.userModel.findOne({ _id: id });
-      if (!user) return { error: 'User not found! Id is required' };
 
-      if (user.id !== id) return { error: 'Unauthorized' };
+      if (!user)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
-      const { value, error } = validateSignUpData(body);
+      if (user.id !== id)
+        throw new HttpException(
+          {
+            status: HttpStatus.UNAUTHORIZED,
+            error: 'Unauthorized',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
 
-      if (error) return error.details[0].message;
-
-      user.firstName = value.firstName ? value.firstName : user.firstName;
-      user.lastName = value.lastName ? value.lastName : user.lastName;
-      user.username = value.username ? value.username : user.username;
-      user.email = value.email ? value.email : user.email;
+      user.firstName = body.firstName ? body.firstName : user.firstName;
+      user.lastName = body.lastName ? body.lastName : user.lastName;
+      user.username = body.username ? body.username : user.username;
+      user.email = body.email ? body.email : user.email;
 
       // re creating a hash for updated password
-      if (value.password) {
+      if (body.password) {
         bcrypt.genSalt(10, (err, salt) => {
           if (err) throw err;
 
-          bcrypt.hash(value.password, salt, (error, hash) => {
+          bcrypt.hash(body.password, salt, (error, hash) => {
             if (error) throw error;
 
             user.password = hash;
@@ -175,7 +178,7 @@ export class UsersService {
     }
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<any> {
     try {
       const user = await this.userModel.findOneAndDelete({ _id: id });
       if (user.id !== id)
@@ -183,7 +186,14 @@ export class UsersService {
           error: 'Unauthorized.',
         };
 
-      if (!user) return { error: 'User does not exist' };
+      if (!user)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       const result = await this.postModel.deleteMany({ createdBy: id });
 
@@ -196,14 +206,23 @@ export class UsersService {
     }
   }
 
-  async followUser(userId: string, selfId: string) {
+  async followUser(userId: string, selfId: string): Promise<any> {
     try {
       const userToFollow = await this.userModel.findOne({
         _id: userId,
       });
-      if (!userToFollow) return { error: 'User not found' };
+
+      if (!userToFollow)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       const user = await this.userModel.findOne({ _id: selfId });
+
       if (user.following.includes(userId))
         return { error: 'User already followed' };
 
@@ -224,12 +243,21 @@ export class UsersService {
     }
   }
 
-  async unfollowUser(userId: string, selfId: string) {
+  async unfollowUser(userId: string, selfId: string): Promise<any> {
     try {
       const userToUnfollow = await this.userModel.findOne({ _id: userId });
-      if (!userToUnfollow) return { error: 'User not found' };
+
+      if (!userToUnfollow)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       const user = await this.userModel.findOne({ _id: selfId });
+
       const indexOfUserFollowing: number = user.following.findIndex(
         (id) => id === userId,
       );
@@ -239,11 +267,15 @@ export class UsersService {
       user.following.splice(indexOfUserFollowing, 1);
 
       await user.save();
+
       const indexToRemove = userToUnfollow.followers.findIndex(
         (id) => id === selfId,
       );
+
       user.followers.splice(indexToRemove, 1);
+
       await user.save();
+
       return {
         success: true,
         msg: 'User unfollowed successfully',

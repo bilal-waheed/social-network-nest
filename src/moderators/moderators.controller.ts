@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  validateLoginData,
+  validatePaginationData,
+  validateSignUpData,
+} from 'src/validation/joi';
 
 import { ModeratorsService } from './moderators.service';
 
@@ -14,13 +26,31 @@ export class ModeratorsController {
     @Body('email') email: string,
     @Body('password') password: string,
   ) {
-    const result = await this.moderatorsService.signup(
+    const { value, error } = validateSignUpData({
       firstName,
       lastName,
       username,
       email,
       password,
+    });
+
+    if (error)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.moderatorsService.signup(
+      value.firstName,
+      value.lastName,
+      value.username,
+      value.email,
+      value.password,
     );
+
     return result;
   }
 
@@ -29,13 +59,47 @@ export class ModeratorsController {
     @Body('username') username: string,
     @Body('password') password: string,
   ) {
-    const result = await this.moderatorsService.login(username, password);
+    const { value, error } = validateLoginData({ username, password });
+
+    if (error)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.moderatorsService.login(
+      value.username,
+      value.password,
+    );
     return result;
   }
 
   @Get('/posts')
-  async getAllPosts() {
-    const result = await this.moderatorsService.getPosts('dateCreated', 1, 1);
+  async getAllPosts(
+    @Body('user') user: { id: string },
+    @Body('param') param: string,
+    @Body('order') order: number,
+    @Body('page') page: number,
+  ) {
+    const { value, error } = validatePaginationData({ param, order, page });
+
+    if (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const result = await this.moderatorsService.getPosts(
+      value.param,
+      value.order,
+      value.page,
+    );
     console.log(result);
     return result;
   }

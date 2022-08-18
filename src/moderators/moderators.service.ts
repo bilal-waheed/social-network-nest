@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
@@ -6,8 +6,6 @@ import { Model } from 'mongoose';
 
 import { Moderator } from './moderators.model';
 import { Post } from '../posts/posts.model';
-import { validateSignUpData, validateLoginData } from '../validation/joi';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ModeratorsService {
@@ -16,7 +14,6 @@ export class ModeratorsService {
   constructor(
     @InjectModel('Moderator') private readonly moderatorModel: Model<Moderator>,
     @InjectModel('Post') private readonly postModel: Model<Post>,
-    private readonly configService: ConfigService,
   ) {}
 
   async signup(
@@ -25,20 +22,10 @@ export class ModeratorsService {
     username: string,
     email: string,
     password: string,
-  ) {
+  ): Promise<any> {
     try {
       const mod = await this.moderatorModel.findOne({ username });
       if (mod) return { error: 'moderator already exists' };
-
-      const { value, error } = validateSignUpData({
-        firstName,
-        lastName,
-        username,
-        email,
-        password,
-      });
-
-      if (error) return error.details[0].message;
 
       const newMod = new this.moderatorModel({
         firstName,
@@ -58,9 +45,10 @@ export class ModeratorsService {
       });
 
       const modObj = await newMod.save();
+
       const token = jwt.sign(
         { id: modObj.id, userType: 'moderator' },
-        this.configService.get<string>('SECRET_OR_PRIVATE_KEY'),
+        process.env.SECRET_OR_PRIVATE_KEY,
         { expiresIn: '24h' },
       );
 
@@ -75,36 +63,44 @@ export class ModeratorsService {
     }
   }
 
-  async login(username: string, password: string) {
+  async login(username: string, password: string): Promise<any> {
     try {
-      const { value, error } = validateLoginData({ username, password });
-      if (error) return error.details[0].message;
-
       // check if the moderator exists
       const mod = await this.moderatorModel.findOne({ username });
-      if (!mod) return { error: 'Moderator not found' };
+      if (!mod)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Moderator not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       // Comparing the password
       const isMatched = bcrypt.compare(password, mod.password);
+
       if (isMatched) {
         const token = jwt.sign(
           { id: mod.id, userType: 'moderator' },
-          this.configService.get<string>('SECRET_OR_PRIVATE_KEY'),
+          process.env.SECRET_OR_PRIVATE_KEY,
           { expiresIn: '24h' },
         );
+
         return { success: true, msg: 'login successful', mod, token };
       }
+
       return { error: 'password incorrect' };
     } catch (err) {
       return err;
     }
   }
 
-  async getPosts(param: string, order: number, pageNumber: number) {
+  async getPosts(
+    param: string,
+    order: number,
+    pageNumber: number,
+  ): Promise<any> {
     try {
-      if (!(param && order && pageNumber))
-        return { error: 'Query parameters required.' };
-
       const orderSort = {};
       orderSort[param] = order;
 

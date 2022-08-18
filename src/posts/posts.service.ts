@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -10,10 +9,10 @@ import { SocketsGateway } from 'src/sockets/sockets.gateway';
 @Injectable()
 export class PostsService {
   PER_PAGE_ITEMS = 2;
+
   constructor(
     @InjectModel('Post') private readonly postModel: Model<Post>,
     @InjectModel('User') private readonly userModel: Model<User>,
-    private readonly configService: ConfigService,
     private readonly socketsGateway: SocketsGateway,
   ) {}
 
@@ -22,11 +21,8 @@ export class PostsService {
     param: string,
     order: number,
     pageNumber: number,
-  ) {
+  ): Promise<any> {
     try {
-      if (!(param && order && pageNumber))
-        return { error: 'Query parameters required.' };
-
       const orderSort = {};
       orderSort[param] = order;
 
@@ -41,7 +37,14 @@ export class PostsService {
         .skip((pageNumber - 1) * this.PER_PAGE_ITEMS)
         .limit(this.PER_PAGE_ITEMS);
 
-      if (!posts) return 'No posts found';
+      if (!posts)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Posts not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       const mappedPosts = posts.map((post) => ({
         _id: post.id,
@@ -63,7 +66,7 @@ export class PostsService {
     }
   }
 
-  async createPost(id: string, title: string, content: string) {
+  async createPost(id: string, title: string, content: string): Promise<any> {
     try {
       const newPost = new this.postModel({
         title: title,
@@ -86,16 +89,20 @@ export class PostsService {
     param: string,
     order: number,
     pageNumber: number,
-  ) {
-    if (!(param && order && pageNumber))
-      return { error: 'Query parameters required.' };
-
+  ): Promise<any> {
     const orderSort = {};
     orderSort[param] = order;
 
     const user = await this.userModel.findOne({ _id: userId });
     if (user.type === 'unpaid')
-      return 'Buy the subscription to view the feed. Go to {DOMAIN_NAME}/checkout';
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          error:
+            'Buy the subscription to view the feed. Go to {DOMAIN_NAME}/checkout',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
 
     const { following } = user;
 
@@ -112,7 +119,14 @@ export class PostsService {
       .skip((pageNumber - 1) * this.PER_PAGE_ITEMS)
       .limit(this.PER_PAGE_ITEMS);
 
-    if (!posts) return 'No posts found';
+    if (!posts)
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Posts not found',
+        },
+        HttpStatus.NOT_FOUND,
+      );
 
     return {
       success: true,
@@ -129,16 +143,27 @@ export class PostsService {
     userId: string,
     title: string,
     content: string,
-  ) {
+  ): Promise<any> {
     try {
       const post = await this.postModel.findOne({ _id: postId });
 
-      if (!post) return { error: 'Post not found' };
+      if (!post)
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Posts not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       if (post.createdBy !== userId)
-        return {
-          error: 'You cannot update a post created by another user.',
-        };
+        throw new HttpException(
+          {
+            status: HttpStatus.UNAUTHORIZED,
+            error: "You cannot update another user's post",
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
 
       post.title = title ? title : post.title;
       post.content = content ? content : post.content;
@@ -158,18 +183,26 @@ export class PostsService {
     }
   }
 
-  async deletePost(postId: string, userId) {
+  async deletePost(postId: string, userId): Promise<any> {
     try {
       const post = await this.postModel.findOneAndDelete({ _id: postId });
       if (!post)
-        return {
-          error: 'Post does not exist',
-        };
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Posts not found',
+          },
+          HttpStatus.NOT_FOUND,
+        );
 
       if (post.createdBy !== userId)
-        return {
-          error: 'You cannot delete a post created by another user.',
-        };
+        throw new HttpException(
+          {
+            status: HttpStatus.UNAUTHORIZED,
+            error: "You cannot delete another user's post",
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
 
       return {
         success: true,

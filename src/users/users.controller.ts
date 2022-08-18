@@ -6,7 +6,10 @@ import {
   Body,
   Param,
   Get,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
+import { validateLoginData, validateSignUpData } from 'src/validation/joi';
 
 import { UsersService } from './users.service';
 
@@ -22,13 +25,31 @@ export class UsersController {
     @Body('email') email: string,
     @Body('password') password: string,
   ) {
-    const result = await this.usersService.signup(
+    const { value, error } = validateSignUpData({
       firstName,
       lastName,
       username,
       email,
       password,
+    });
+
+    if (error)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.usersService.signup(
+      value.firstName,
+      value.lastName,
+      value.username,
+      value.email,
+      value.password,
     );
+
     return result;
   }
 
@@ -37,7 +58,21 @@ export class UsersController {
     @Body('username') username: string,
     @Body('password') password: string,
   ) {
-    const result = await this.usersService.login(username, password);
+    const { value, error } = validateLoginData({ username, password });
+
+    if (error)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.usersService.login(
+      value.username,
+      value.password,
+    );
     return result;
   }
 
@@ -56,13 +91,24 @@ export class UsersController {
     @Body('email') email?: string,
     @Body('password') password?: string,
   ) {
-    const result = await this.usersService.updateProfile(user.id, {
+    const { value, error } = validateSignUpData({
       firstName,
       lastName,
       username,
       email,
       password,
     });
+
+    if (error)
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const result = await this.usersService.updateProfile(user.id, value);
     return result;
   }
 

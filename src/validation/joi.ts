@@ -13,8 +13,17 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).max(15).required(),
 });
 
+const paginationSchema = Joi.object({
+  param: Joi.string().required(),
+  order: Joi.number().required(),
+  page: Joi.number().required(),
+});
+
 export const validateSignUpData = (signUpObject) =>
   signUpSchema.validate(signUpObject);
 
 export const validateLoginData = (loginObject) =>
   loginSchema.validate(loginObject);
+
+export const validatePaginationData = (paginationObject) =>
+  paginationSchema.validate(paginationObject);

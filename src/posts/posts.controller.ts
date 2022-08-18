@@ -6,8 +6,11 @@ import {
   Body,
   Delete,
   Patch,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
+import { validatePaginationData } from 'src/validation/joi';
 
 @Controller('posts')
 export class PostsController {
@@ -55,11 +58,23 @@ export class PostsController {
     @Body('order') order: number,
     @Body('page') page: number,
   ) {
+    const { value, error } = validatePaginationData({ param, order, page });
+
+    if (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const result = await this.postsService.getAllPosts(
       user.id,
-      param,
-      order,
-      page,
+      value.param,
+      value.order,
+      value.page,
     );
     return result;
   }
@@ -71,7 +86,24 @@ export class PostsController {
     @Body('order') order: number,
     @Body('page') page: number,
   ) {
-    const result = await this.postsService.getFeed(user.id, param, order, page);
+    const { value, error } = validatePaginationData({ param, order, page });
+
+    if (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.details[0].message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const result = await this.postsService.getFeed(
+      user.id,
+      value.param,
+      value.order,
+      value.page,
+    );
     return result;
   }
 }
