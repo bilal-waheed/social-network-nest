@@ -8,12 +8,14 @@ import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { ModeratorsModule } from './moderators/moderators.module';
 import { AuthMiddleware } from './middleware/authenticate.middleware';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
     UsersModule,
     PostsModule,
     ModeratorsModule,
+    CheckoutModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -42,6 +44,7 @@ export class AppModule {
         'posts/delete/:id',
         'posts/all',
         'posts/feed',
+        '/checkout',
       );
   }
 }

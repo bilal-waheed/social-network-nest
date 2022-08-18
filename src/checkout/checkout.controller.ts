@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 
 import { CheckoutService } from './checkout.service';
 
@@ -7,8 +7,11 @@ export class CheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}
 
   @Post('/')
-  checkout() {
-    const result = this.checkoutService.checkout();
+  async checkout(
+    @Body('user') user: { id: string },
+    @Body('email') email: string,
+  ) {
+    const result = await this.checkoutService.checkout(user.id, email);
     return result;
   }
 }
