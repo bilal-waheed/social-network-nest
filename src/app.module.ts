@@ -33,7 +33,6 @@ export class AppModule {
     consumer
       .apply(AuthMiddleware)
       .forRoutes(
-        'moderators/posts',
         'users/profile',
         'users/update',
         'users/delete',
@@ -44,6 +43,7 @@ export class AppModule {
         'posts/delete/:id',
         'posts/all',
         'posts/feed',
+        'moderators/posts',
         '/checkout',
       );
   }

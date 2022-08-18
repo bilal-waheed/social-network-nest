@@ -14,6 +14,11 @@ export class CheckoutService {
     });
   }
 
+  /**
+   * Stripe payment for feed. Returns a success message
+   * @param {string} userId - mongo id of user.
+   * @param {string} email - email of user.
+   */
   async checkout(userId: string, email: string): Promise<any> {
     try {
       const paymentMethod = await this.stripe.paymentMethods.create({
