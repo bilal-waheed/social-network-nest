@@ -23,8 +23,7 @@ export class PostsController {
     @Body('title') title: string,
     @Body('content') content: string,
   ) {
-    const result = await this.postsService.createPost(user.id, title, content);
-    return result;
+    return await this.postsService.createPost(user.id, title, content);
   }
 
   @Patch('/update/:id')
@@ -34,13 +33,7 @@ export class PostsController {
     @Body('title') title?: string,
     @Body('content') content?: string,
   ) {
-    const result = await this.postsService.updatePost(
-      postId,
-      user.id,
-      title,
-      content,
-    );
-    return result;
+    return await this.postsService.updatePost(postId, user.id, title, content);
   }
 
   @Delete('/delete/:id')
@@ -48,8 +41,7 @@ export class PostsController {
     @Body('user') user: { id: string },
     @Param('id') postId: string,
   ) {
-    const result = await this.postsService.deletePost(postId, user.id);
-    return result;
+    return await this.postsService.deletePost(postId, user.id);
   }
 
   @Get('/all')
@@ -64,13 +56,12 @@ export class PostsController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.postsService.getAllPosts(
+    return await this.postsService.getAllPosts(
       user.id,
       value.param,
       value.order,
       value.page,
     );
-    return result;
   }
 
   @Get('/feed')
@@ -85,12 +76,11 @@ export class PostsController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.postsService.getFeed(
+    return await this.postsService.getFeed(
       user.id,
       value.param,
       value.order,
       value.page,
     );
-    return result;
   }
 }

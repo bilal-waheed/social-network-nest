@@ -36,15 +36,13 @@ export class UsersController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.usersService.signup(
+    return await this.usersService.signup(
       value.firstName,
       value.lastName,
       value.username,
       value.email,
       value.password,
     );
-
-    return result;
   }
 
   @Post('/login')
@@ -57,17 +55,12 @@ export class UsersController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.usersService.login(
-      value.username,
-      value.password,
-    );
-    return result;
+    return await this.usersService.login(value.username, value.password);
   }
 
   @Get('/profile')
   async getProfile(@Body('user') user: { id: string }) {
-    const result = await this.usersService.getProfile(user.id);
-    return result;
+    return await this.usersService.getProfile(user.id);
   }
 
   @Patch('/update')
@@ -90,14 +83,12 @@ export class UsersController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.usersService.updateProfile(user.id, value);
-    return result;
+    return await this.usersService.updateProfile(user.id, value);
   }
 
   @Delete('/delete')
   async userDelete(@Body('user') user: { id: string }) {
-    const result = await this.usersService.deleteUser(user.id);
-    return result;
+    return await this.usersService.deleteUser(user.id);
   }
 
   @Patch('/follow-user/:id')
@@ -105,8 +96,7 @@ export class UsersController {
     @Body('user') user: { id: string },
     @Param('id') idToFollow: string,
   ) {
-    const result = await this.usersService.followUser(idToFollow, user.id);
-    return result;
+    return await this.usersService.followUser(idToFollow, user.id);
   }
 
   @Patch('/unfollow-user/:id')
@@ -114,7 +104,6 @@ export class UsersController {
     @Body('user') user: { id: string },
     @Param('id') idToFollow: string,
   ) {
-    const result = await this.usersService.unfollowUser(idToFollow, user.id);
-    return result;
+    return await this.usersService.unfollowUser(idToFollow, user.id);
   }
 }

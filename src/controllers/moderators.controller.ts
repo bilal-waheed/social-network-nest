@@ -43,15 +43,13 @@ export class ModeratorsController {
         HttpStatus.BAD_REQUEST,
       );
 
-    const result = await this.moderatorsService.signup(
+    return await this.moderatorsService.signup(
       value.firstName,
       value.lastName,
       value.username,
       value.email,
       value.password,
     );
-
-    return result;
   }
 
   @Post('/login')
@@ -64,11 +62,7 @@ export class ModeratorsController {
     if (error)
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
 
-    const result = await this.moderatorsService.login(
-      value.username,
-      value.password,
-    );
-    return result;
+    return await this.moderatorsService.login(value.username, value.password);
   }
 
   @Get('/posts')
@@ -83,12 +77,10 @@ export class ModeratorsController {
     if (error) {
       throw new HttpException(error.details[0].message, HttpStatus.BAD_REQUEST);
     }
-    const result = await this.moderatorsService.getPosts(
+    return await this.moderatorsService.getPosts(
       value.param,
       value.order,
       value.page,
     );
-    console.log(result);
-    return result;
   }
 }

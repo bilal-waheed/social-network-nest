@@ -11,7 +11,6 @@ export class CheckoutController {
     @Body('user') user: { id: string },
     @Body('email') email: string,
   ) {
-    const result = await this.checkoutService.checkout(user.id, email);
-    return result;
+    return await this.checkoutService.checkout(user.id, email);
   }
 }
