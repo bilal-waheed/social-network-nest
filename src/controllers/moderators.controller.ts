@@ -6,12 +6,12 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+
 import {
   validateLoginData,
   validatePaginationData,
   validateSignUpData,
 } from 'src/validation/joi';
-
 import { ModeratorsService } from '../services/moderators.service';
 
 @Controller('moderators')

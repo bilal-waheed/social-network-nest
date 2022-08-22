@@ -33,7 +33,9 @@ export class PostsService {
       const orderSort = {};
       orderSort[param] = order;
 
-      const postsCount = await this.postModel.find({ createdBy: id }).count();
+      const postsCount: number = await this.postModel
+        .find({ createdBy: id })
+        .count();
 
       if (pageNumber * this.PER_PAGE_ITEMS >= postsCount + this.PER_PAGE_ITEMS)
         throw new HttpException(
@@ -50,16 +52,9 @@ export class PostsService {
       if (!posts)
         throw new HttpException('No posts found', HttpStatus.NOT_FOUND);
 
-      const mappedPosts = posts.map((post) => ({
-        _id: post.id,
-        title: post.title,
-        content: post.content,
-        dateCreated: post.dateCreated,
-      }));
-
       return {
         success: true,
-        mappedPosts,
+        posts,
         totalPosts: postsCount,
         nextPage: Number(pageNumber) + 1,
         hasNextPage: pageNumber * this.PER_PAGE_ITEMS < postsCount,

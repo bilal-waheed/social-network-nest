@@ -121,7 +121,7 @@ export class ModeratorsService {
       const orderSort = {};
       orderSort[param] = order;
 
-      const postsCount = await this.postModel.find().count();
+      const postsCount: number = await this.postModel.find().count();
 
       if (pageNumber * this.PER_PAGE_ITEMS >= postsCount + this.PER_PAGE_ITEMS)
         throw new HttpException(

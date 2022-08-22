@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-
 import { Model } from 'mongoose';
+
 import { User } from '../interfaces/user.interface';
 import { Post } from '../interfaces/post.interface';
 

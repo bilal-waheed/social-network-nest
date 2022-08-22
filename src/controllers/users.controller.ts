@@ -9,8 +9,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { validateLoginData, validateSignUpData } from 'src/validation/joi';
 
+import { validateLoginData, validateSignUpData } from 'src/validation/joi';
 import { UsersService } from '../services/users.service';
 
 @Controller('users')
